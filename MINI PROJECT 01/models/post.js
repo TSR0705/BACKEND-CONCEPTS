@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const postSchema = mongoose.Schema({
     user:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user',
     },
 
     date: {
@@ -14,7 +14,7 @@ const postSchema = mongoose.Schema({
     },
 
     content: String,
-    likes: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    likes: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     
 });
 

@@ -16,10 +16,15 @@
     </div>
 
     <!-- Welcome Heading -->
-    <h3 class="text-3xl md:text-4xl mt-3 font-semibold">
-        <span class="font-light">Hello</span>, <%= user.name %> 👋
-    </h3>
+     <div class="flex items-start gap-3">
+        <div class="w-10 h-12 rounded-md overflow-hidden">
+            <img class="w-full h-full object-cover" src="/images/uploads/<%= user.profilepic %>" alt="">
+        </div>
+        <h3 class="text-3xl md:text-4xl mt-3 font-semibold"><span class="font-light">Hello</span>, <%= user.name %> 👋</h3>
+    </div>
+
     <h5 class="mt-2 text-zinc-400 text-base md:text-lg">You can create a new post below.</h5>
+
 
     <!-- Post Creation Form -->
     <form action="/post" method="post" class="mt-8 w-full px-2 md:px-4 max-w-md">

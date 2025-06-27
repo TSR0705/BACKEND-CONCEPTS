@@ -2,11 +2,11 @@ const express = require ('express');
 const app =express();  
 const userModel = require('./models/user');
 const cookieParser = require('cookie-parser');
-const path=require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const postModel = require('./models/post');
-
+const path = require("path");
+const upload = require('./config/multerconfig');
 
 app.set("view engine","ejs");
 app.use(express.json());
@@ -14,10 +14,56 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname, 'public' )));
 app.use(cookieParser());
 
+
+//this is used for giving random names to the file
+// crypto.randomBytes(12, function(err,bytes){
+//     console.log(bytes.toString("hex"));
+// })
+
+
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'public/images/uploads'); // Avoid leading slash for relative path
+//   },
+//   filename: function (req, file, cb) {
+//     crypto.randomBytes(16, function (err, bytes) {
+//       if (err) return cb(err);
+
+//       const fn = bytes.toString("hex") + path.extname(file.originalname);
+//       cb(null, fn);
+//     });
+//   }
+// });
+
+// const upload = multer({ storage: storage });
+
+// dummy route
+// app.get("/test",function(req,res){
+
+//     res.render("test");
+// })
+
+ 
+// dummy route
+app.post("/upload",isLoggedIn , upload.single("image"), async function (req, res) {
+
+    let user = await userModel.findOne({email: req.user.email});
+    user.profilepic = req.file.filename;
+    await user.save()
+    res.redirect("/profile");
+
+});
+
+
+
+
 app.get("/",function(req,res){
 
     res.render("index");
 })
+
+
+
 
 app.get("/login", function(req,res){
     res.render("login");
@@ -32,6 +78,11 @@ app.get("/profile", isLoggedIn, async function(req, res) {
     res.render("profile", { user }); 
 });
 
+
+app.get("/profile/upload", function(req,res){
+    res.render("profileupload");
+
+})
 
 app.get("/like/:id", isLoggedIn, async function(req, res) {
     let post = await postModel.findOne({ _id: req.params.id }).populate("user");

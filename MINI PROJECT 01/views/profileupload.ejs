@@ -1,20 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <div class="w-full h-screen bg-zinc-900  p-10 ">
-         
-        <h1 class="text-3xl text-white font-bold mb-5">Upload Profile Picture</h1>
-        <form method="post" action="/upload" autocomplete="off" enctype="multipart/form-data">
-            <input class="px-5 py-2 rounded-md bg-blue-200" name="image" type="file">
-            
-            <input type="submit" class=" px-5  py-2 rounded-md text-white bg-blue-600" value="Upload File" >
-        </form>
+  </head>
+  <body>
+    <div class="w-full h-screen bg-zinc-900 p-10">
+      <h1 class="text-3xl text-white font-bold mb-5">Upload Profile Picture</h1>
+      <form
+        method="post"
+        action="/upload"
+        autocomplete="off"
+        enctype="multipart/form-data"
+      >
+        <input
+          class="px-5 py-2 rounded-md bg-blue-200"
+          name="image"
+          type="file"
+        />
+
+        <input
+          type="submit"
+          class="px-5 py-2 rounded-md text-white bg-blue-600"
+          value="Upload File"
+        />
+      </form>
     </div>
-</body>
+  </body>
 </html>

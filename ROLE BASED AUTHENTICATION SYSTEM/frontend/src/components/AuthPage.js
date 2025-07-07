@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { FaGoogle, FaGithub } from "react-icons/fa";
+import axios from "axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,7 +28,7 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleAuth = () => {
+  const handleAuth = async () => {
     if (!email || !password || (!isLogin && !fullName)) {
       setError("Please fill in all required fields.");
       return;
@@ -43,24 +44,40 @@ export default function AuthPage() {
       return;
     }
 
-    setError(""); // Clear errors if all checks pass
+    setError(""); // Clear previous errors
 
-    // Role-based navigation
-    switch (role) {
-      case "Judge":
-        navigate("/judge-dashboard");
-        break;
-      case "Lawyer":
-        navigate("/lawyer-dashboard");
-        break;
-      case "Law Student":
-        navigate("/student-dashboard");
-        break;
-      case "Litigants":
-        navigate("/litigant-dashboard");
-        break;
-      default:
-        setError("Invalid role selected.");
+    try {
+      const endpoint = isLogin ? "login" : "signup";
+
+      const payload = isLogin
+        ? { email, password, role }
+        : { fullName, email, password, role };
+
+      const res = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, payload);
+
+      const { token, user } = res.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role);
+
+      switch (user.role) {
+        case "Judge":
+          navigate("/judge-dashboard");
+          break;
+        case "Lawyer":
+          navigate("/lawyer-dashboard");
+          break;
+        case "Law Student":
+          navigate("/student-dashboard");
+          break;
+        case "Litigants":
+          navigate("/litigant-dashboard");
+          break;
+        default:
+          setError("Unknown role received from server.");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred.");
     }
   };
 
@@ -188,7 +205,10 @@ export default function AuthPage() {
                 }}
                 onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
                 onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-                onClick={handleAuth}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAuth();
+                }}
               >
                 {isLogin ? "Login" : "Sign Up"}
               </Button>
@@ -208,13 +228,15 @@ export default function AuthPage() {
               <IconButton
                 style={{ color: "#4db8ff", transition: "transform 0.2s" }}
                 onMouseOver={(e) => (e.target.style.transform = "scale(1.1)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}>
+                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+              >
                 <FaGoogle size={22} />
               </IconButton>
               <IconButton
                 style={{ color: "#E0E0E0", transition: "transform 0.2s" }}
                 onMouseOver={(e) => (e.target.style.transform = "scale(1.1)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}>
+                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+              >
                 <FaGithub size={22} />
               </IconButton>
             </div>

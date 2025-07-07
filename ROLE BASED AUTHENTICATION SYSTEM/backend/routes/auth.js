@@ -4,8 +4,9 @@ const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// JWT Secret (In production, use environment variable)
-const JWT_SECRET = 'your_jwt_secret_key';
+// Use JWT Secret from environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
+console.log("JWT_SECRET is:", JWT_SECRET);
 
 // @route   POST /api/auth/signup
 // @desc    Register new user
@@ -65,8 +66,9 @@ router.post('/login', async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: 'Invalid credentials' });
 
-    if (user.role !== role)
+    if (user.role !== role) {
       return res.status(400).json({ message: 'Incorrect role selected' });
+    }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },

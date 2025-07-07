@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const JWT_SECRET = 'your_jwt_secret_key'; // In production, use process.env.JWT_SECRET
+// In production, use secret from environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware to verify token and attach user to request
 const authenticate = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
-  if (!token)
+  if (!token) {
     return res.status(401).json({ message: 'Access Denied. No token provided.' });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -24,9 +26,7 @@ const authenticate = async (req, res, next) => {
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ message: 'Access denied. Insufficient permissions.' });
+      return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
     }
     next();
   };

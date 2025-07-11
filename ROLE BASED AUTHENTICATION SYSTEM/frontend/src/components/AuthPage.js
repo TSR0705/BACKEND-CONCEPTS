@@ -17,6 +17,7 @@ import {
 import { motion } from "framer-motion";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext"; // ✅ NEW
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,6 +28,7 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ NEW
 
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && !fullName)) {
@@ -57,8 +59,7 @@ export default function AuthPage() {
 
       const { token, user } = res.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", user.role);
+      login(token, user); // ✅ Replace direct localStorage access
 
       switch (user.role) {
         case "Judge":

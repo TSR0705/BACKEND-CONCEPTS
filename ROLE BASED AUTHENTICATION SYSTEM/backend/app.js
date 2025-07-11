@@ -17,6 +17,9 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 
+//protected Routes
+app.use('/api/protected', require('./routes/protected'));
+
 // Default Route
 app.get('/', (req, res) => {
   res.send('Role-Based Authentication API Running');

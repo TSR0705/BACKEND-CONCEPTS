@@ -4,17 +4,51 @@ import JudgeDashboard from "./components/JudgeDashboard";
 import LawyerDashboard from "./components/LawyerDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import LitigantDashboard from "./components/LitigantDashboard";
+import { AuthProvider } from "./context/AuthContext"; // ✅ NEW
+import ProtectedRoute from "./components/ProtectedRoutes"; // ✅ NEW
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/judge-dashboard" element={<JudgeDashboard />} />
-        <Route path="/lawyer-dashboard" element={<LawyerDashboard />} />
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
-        <Route path="/litigant-dashboard" element={<LitigantDashboard />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<AuthPage />} />
+
+          {/* 🔐 Protected Routes */}
+          <Route
+            path="/judge-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["Judge"]}>
+                <JudgeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lawyer-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["Lawyer"]}>
+                <LawyerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["Law Student"]}>
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/litigant-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["Litigants"]}>
+                <LitigantDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }

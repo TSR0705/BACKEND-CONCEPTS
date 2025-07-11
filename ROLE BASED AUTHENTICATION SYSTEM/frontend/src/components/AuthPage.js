@@ -17,7 +17,8 @@ import {
 import { motion } from "framer-motion";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext"; // ✅ NEW
+import { useAuth } from "../context/AuthContext";
+import OtpVerification from "./OtpVerification"; // ✅ NEW
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,8 +28,11 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
+  const [showOtp, setShowOtp] = useState(false); // ✅ NEW
+  const [signupEmail, setSignupEmail] = useState(""); // ✅ NEW
+
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ NEW
+  const { login } = useAuth();
 
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && !fullName)) {
@@ -46,39 +50,68 @@ export default function AuthPage() {
       return;
     }
 
-    setError(""); // Clear previous errors
+    setError("");
 
     try {
-      const endpoint = isLogin ? "login" : "signup";
+      if (isLogin) {
+        const res = await axios.post("http://localhost:5000/api/auth/login", {
+          email,
+          password,
+          role,
+        });
 
-      const payload = isLogin
-        ? { email, password, role }
-        : { fullName, email, password, role };
+        login(res.data.token, res.data.user);
 
-      const res = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, payload);
+        switch (res.data.user.role) {
+          case "Judge":
+            navigate("/judge-dashboard");
+            break;
+          case "Lawyer":
+            navigate("/lawyer-dashboard");
+            break;
+          case "Law Student":
+            navigate("/student-dashboard");
+            break;
+          case "Litigants":
+            navigate("/litigant-dashboard");
+            break;
+          default:
+            setError("Unknown role received from server.");
+        }
+      } else {
+        await axios.post("http://localhost:5000/api/auth/signup-initiate", {
+          fullName,
+          email,
+          password,
+          role,
+        });
 
-      const { token, user } = res.data;
-
-      login(token, user); // ✅ Replace direct localStorage access
-
-      switch (user.role) {
-        case "Judge":
-          navigate("/judge-dashboard");
-          break;
-        case "Lawyer":
-          navigate("/lawyer-dashboard");
-          break;
-        case "Law Student":
-          navigate("/student-dashboard");
-          break;
-        case "Litigants":
-          navigate("/litigant-dashboard");
-          break;
-        default:
-          setError("Unknown role received from server.");
+        setSignupEmail(email);
+        setShowOtp(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred.");
+    }
+  };
+
+  const handleOtpVerified = (user, token) => {
+    login(token, user);
+
+    switch (user.role) {
+      case "Judge":
+        navigate("/judge-dashboard");
+        break;
+      case "Lawyer":
+        navigate("/lawyer-dashboard");
+        break;
+      case "Law Student":
+        navigate("/student-dashboard");
+        break;
+      case "Litigants":
+        navigate("/litigant-dashboard");
+        break;
+      default:
+        setError("Unknown role received after verification.");
     }
   };
 
@@ -124,131 +157,137 @@ export default function AuthPage() {
               </Alert>
             )}
 
-            <form style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {!isLogin && (
+            {!showOtp ? (
+              <form style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {!isLogin && (
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
+                    InputProps={{ style: { color: "white" } }}
+                  />
+                )}
                 <TextField
                   fullWidth
-                  label="Full Name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
                   InputProps={{ style: { color: "white" } }}
                 />
-              )}
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
-                InputProps={{ style: { color: "white" } }}
-              />
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
-                InputProps={{ style: { color: "white" } }}
-              />
-              {!isLogin && (
                 <TextField
                   fullWidth
-                  label="Confirm Password"
+                  label="Password"
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
                   InputProps={{ style: { color: "white" } }}
                 />
-              )}
-              <FormControl fullWidth style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}>
-                <InputLabel style={{ color: "white" }}>Role</InputLabel>
-                <Select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  variant="outlined"
-                  style={{ color: "white" }}
-                >
-                  <MenuItem value="Judge">Judge</MenuItem>
-                  <MenuItem value="Lawyer">Lawyer</MenuItem>
-                  <MenuItem value="Law Student">Law Student</MenuItem>
-                  <MenuItem value="Litigants">Litigants</MenuItem>
-                </Select>
-              </FormControl>
+                {!isLogin && (
+                  <TextField
+                    fullWidth
+                    label="Confirm Password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}
+                    InputProps={{ style: { color: "white" } }}
+                  />
+                )}
+                <FormControl fullWidth style={{ backgroundColor: "#2a3b4f", borderRadius: "5px" }}>
+                  <InputLabel style={{ color: "white" }}>Role</InputLabel>
+                  <Select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    variant="outlined"
+                    style={{ color: "white" }}
+                  >
+                    <MenuItem value="Judge">Judge</MenuItem>
+                    <MenuItem value="Lawyer">Lawyer</MenuItem>
+                    <MenuItem value="Law Student">Law Student</MenuItem>
+                    <MenuItem value="Litigants">Litigants</MenuItem>
+                  </Select>
+                </FormControl>
 
-              {isLogin && (
-                <Typography
-                  align="right"
+                {isLogin && (
+                  <Typography
+                    align="right"
+                    style={{
+                      color: "#4db8ff",
+                      fontSize: "14px",
+                      marginTop: "8px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Forgot Password?
+                  </Typography>
+                )}
+
+                <Button
+                  fullWidth
+                  variant="contained"
                   style={{
-                    color: "#4db8ff",
-                    fontSize: "14px",
-                    marginTop: "8px",
-                    cursor: "pointer",
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    fontWeight: "bold",
+                    padding: "8px",
+                    borderRadius: "5px",
+                    transition: "transform 0.2s",
+                  }}
+                  onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
+                  onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAuth();
                   }}
                 >
-                  Forgot Password?
+                  {isLogin ? "Login" : "Sign Up"}
+                </Button>
+              </form>
+            ) : (
+              <OtpVerification
+                email={signupEmail}
+                onVerified={(user) => handleOtpVerified(user, localStorage.getItem("token"))}
+              />
+            )}
+
+            {!showOtp && (
+              <>
+                <Divider
+                  style={{
+                    backgroundColor: "#424242",
+                    marginTop: "20px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  or continue with
+                </Divider>
+
+                <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+                  <IconButton style={{ color: "#4db8ff" }}>
+                    <FaGoogle size={22} />
+                  </IconButton>
+                  <IconButton style={{ color: "#E0E0E0" }}>
+                    <FaGithub size={22} />
+                  </IconButton>
+                </div>
+
+                <Typography
+                  align="center"
+                  style={{ color: "#B0BEC5", marginTop: "16px", cursor: "pointer" }}
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setError("");
+                  }}
+                >
+                  {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
                 </Typography>
-              )}
-
-              <Button
-                fullWidth
-                variant="contained"
-                style={{
-                  backgroundColor: "#007BFF",
-                  color: "white",
-                  fontWeight: "bold",
-                  padding: "8px",
-                  borderRadius: "5px",
-                  transition: "transform 0.2s",
-                }}
-                onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleAuth();
-                }}
-              >
-                {isLogin ? "Login" : "Sign Up"}
-              </Button>
-            </form>
-
-            <Divider
-              style={{
-                backgroundColor: "#424242",
-                marginTop: "20px",
-                marginBottom: "20px",
-              }}
-            >
-              or continue with
-            </Divider>
-
-            <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-              <IconButton
-                style={{ color: "#4db8ff", transition: "transform 0.2s" }}
-                onMouseOver={(e) => (e.target.style.transform = "scale(1.1)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-              >
-                <FaGoogle size={22} />
-              </IconButton>
-              <IconButton
-                style={{ color: "#E0E0E0", transition: "transform 0.2s" }}
-                onMouseOver={(e) => (e.target.style.transform = "scale(1.1)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-              >
-                <FaGithub size={22} />
-              </IconButton>
-            </div>
-
-            <Typography
-              align="center"
-              style={{ color: "#B0BEC5", marginTop: "16px", cursor: "pointer" }}
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
-            </Typography>
+              </>
+            )}
           </CardContent>
         </Card>
       </motion.div>

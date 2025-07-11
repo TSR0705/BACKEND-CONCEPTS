@@ -1,17 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const User = require('../models/user');
+const PendingUser = require('../models/pendingUser');
+const sendOTPEmail = require('../utils/sendOTPEmail');
 
-// Use JWT Secret from environment variables
 const JWT_SECRET = process.env.JWT_SECRET;
-console.log("JWT_SECRET is:", JWT_SECRET);
 
-// @route   POST /api/auth/signup
-// @desc    Register new user
-// @access  Public
-router.post('/signup', async (req, res) => {
+// ✅ Generate 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+/* ------------------------------------------------
+   INITIATE SIGNUP - Send OTP
+--------------------------------------------------*/
+router.post('/signup-initiate', async (req, res) => {
   const { fullName, email, password, role } = req.body;
 
   if (!fullName || !email || !password || !role) {
@@ -20,36 +23,81 @@ router.post('/signup', async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: 'User already exists' });
+    const existingPending = await PendingUser.findOne({ email });
 
-    const newUser = new User({ fullName, email, password, role });
-    await newUser.save();
+    if (existingUser || existingPending) {
+      return res.status(400).json({ message: 'Email already in use or pending verification' });
+    }
 
-    const token = jwt.sign(
-      { id: newUser._id, role: newUser.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const otp = generateOTP();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
 
-    res.status(201).json({
-      token,
-      user: {
-        id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        role: newUser.role,
-      },
-    });
+    const pendingUser = new PendingUser({ fullName, email, password, role, otpHash, otpExpires });
+    await pendingUser.save();
+
+    await sendOTPEmail(email, otp);
+    res.status(200).json({ message: 'OTP sent to your email' });
+
   } catch (err) {
-    console.error(err);
+    console.error('Signup Initiation Error:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 });
 
-// @route   POST /api/auth/login
-// @desc    Authenticate user & get token
-// @access  Public
+/* ------------------------------------------------
+   VERIFY OTP & COMPLETE SIGNUP
+--------------------------------------------------*/
+router.post('/signup-verify', async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ message: 'Email and OTP are required' });
+  }
+
+  try {
+    const pending = await PendingUser.findOne({ email });
+
+    if (!pending || pending.otpExpires < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    const isMatch = await bcrypt.compare(otp, pending.otpHash);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect OTP' });
+
+    // Create verified user
+    const hashedPassword = await bcrypt.hash(pending.password, 10);
+    const user = new User({
+      fullName: pending.fullName,
+      email: pending.email,
+      password: hashedPassword,
+      role: pending.role
+    });
+
+    await user.save();
+    await PendingUser.deleteOne({ email });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      }
+    });
+
+  } catch (err) {
+    console.error('Signup Verification Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+/* ------------------------------------------------
+   LOGIN - No changes
+--------------------------------------------------*/
 router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
 
@@ -59,22 +107,16 @@ router.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch)
-      return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     if (user.role !== role) {
       return res.status(400).json({ message: 'Incorrect role selected' });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
@@ -83,10 +125,11 @@ router.post('/login', async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-      },
+      }
     });
+
   } catch (err) {
-    console.error(err);
+    console.error('Login Error:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 });

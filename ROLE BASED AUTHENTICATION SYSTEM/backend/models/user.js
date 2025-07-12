@@ -22,6 +22,14 @@ const UserSchema = new mongoose.Schema({
     enum: ['Judge', 'Lawyer', 'Law Student', 'Litigants'],
     required: [true, 'Role is required'],
   },
+  otpHash: {
+    type: String,
+    default: null,
+  },
+  otpExpires: {
+    type: Date,
+    default: null,
+  }
 }, { timestamps: true });
 
 // Hash password before saving

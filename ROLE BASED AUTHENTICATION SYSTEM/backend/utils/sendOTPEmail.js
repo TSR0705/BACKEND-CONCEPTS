@@ -1,10 +1,11 @@
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,        // Your Gmail address
-    pass: process.env.EMAIL_PASS         // App password or Gmail pass (if not 2FA)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   }
 });
 
@@ -16,7 +17,13 @@ const sendOTPEmail = async (to, otp) => {
     html: `<p>Your verification OTP is: <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent to ${to}`);
+  } catch (error) {
+    console.error('❌ Failed to send OTP email:', error.message);
+    throw new Error('Failed to send OTP email');
+  }
 };
 
 module.exports = sendOTPEmail;

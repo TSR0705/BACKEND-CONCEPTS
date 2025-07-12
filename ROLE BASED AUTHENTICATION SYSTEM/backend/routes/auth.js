@@ -134,4 +134,68 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+/* ------------------------------------------------
+   FORGOT PASSWORD - Send OTP
+--------------------------------------------------*/
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'No user with this email' });
+
+    const otp = generateOTP();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.otpHash = otpHash;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    await sendOTPEmail(email, otp);
+    res.status(200).json({ message: 'OTP sent to your email for password reset' });
+
+  } catch (err) {
+    console.error('Forgot Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+/* ------------------------------------------------
+   RESET PASSWORD - Verify OTP and Update Password
+--------------------------------------------------*/
+router.post('/reset-password', async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || !user.otpHash || !user.otpExpires || user.otpExpires < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    const isMatch = await bcrypt.compare(otp, user.otpHash);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect OTP' });
+
+    user.password = newPassword; // Will be hashed in pre-save
+    user.otpHash = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful. You can now log in.' });
+
+  } catch (err) {
+    console.error('Reset Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
+
 module.exports = router;

@@ -4,13 +4,15 @@ import { createContext, useContext, useState } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [user, setUser] = useState(() => {
-    const userData = localStorage.getItem('user');
-    return userData ? JSON.parse(userData) : null;
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
   });
 
   const login = (token, user) => {
+    if (!token || !user) return;
+
     setToken(token);
     setUser(user);
     localStorage.setItem('token', token);

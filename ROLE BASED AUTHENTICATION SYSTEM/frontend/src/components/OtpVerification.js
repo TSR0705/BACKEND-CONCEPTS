@@ -1,42 +1,79 @@
 // components/OtpVerification.js
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { TextField, Button, Typography, Alert } from "@mui/material";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
-export default function OtpVerification({ email, onVerified }) {
+export default function OtpVerification() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const email = location.state?.email || "";
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
 
   const handleVerify = async () => {
+    if (!otp || !email) {
+      setError("Email or OTP missing.");
+      return;
+    }
+
     try {
       const res = await axios.post("http://localhost:5000/api/auth/signup-verify", {
         email,
         otp,
       });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role);
+      const { token, user } = res.data;
 
-      onVerified(res.data.user);
+      login(token, user); // Use context to log in
+
+      // Navigate based on role
+      switch (user.role) {
+        case "Judge":
+          navigate("/judge-dashboard");
+          break;
+        case "Lawyer":
+          navigate("/lawyer-dashboard");
+          break;
+        case "Law Student":
+          navigate("/student-dashboard");
+          break;
+        case "Litigants":
+          navigate("/litigant-dashboard");
+          break;
+        default:
+          setError("Unknown user role.");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed.");
     }
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "1rem" }}>
+    <div style={{ textAlign: "center", padding: "2rem", maxWidth: "400px", margin: "0 auto" }}>
       <Typography variant="h6" gutterBottom>
-        Enter the OTP sent to your email
+        Verify Your Email
       </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
+
+      {error && <Alert severity="error" style={{ marginBottom: "1rem" }}>{error}</Alert>}
+
       <TextField
+        label="Enter OTP"
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
-        label="6-digit OTP"
         fullWidth
-        style={{ margin: "1rem 0" }}
+        style={{ marginBottom: "1rem" }}
       />
-      <Button variant="contained" color="primary" onClick={handleVerify}>
+
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={handleVerify}
+      >
         Verify OTP
       </Button>
     </div>

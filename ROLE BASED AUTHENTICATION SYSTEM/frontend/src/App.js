@@ -4,17 +4,21 @@ import JudgeDashboard from "./components/JudgeDashboard";
 import LawyerDashboard from "./components/LawyerDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import LitigantDashboard from "./components/LitigantDashboard";
-import { AuthProvider } from "./context/AuthContext"; // ✅ NEW
-import ProtectedRoute from "./components/ProtectedRoutes"; // ✅ NEW
+import ForgotPassword from "./components/ForgotPassword"; // ✅ NEW
+ 
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 export default function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<AuthPage />} />
-
-          {/* 🔐 Protected Routes */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+           
+          {/* Protected Role-Based Dashboards */}
           <Route
             path="/judge-dashboard"
             element={

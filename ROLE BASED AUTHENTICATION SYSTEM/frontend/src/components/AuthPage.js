@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import OtpVerification from "./OtpVerification"; // ✅ NEW
+import OtpVerification from "./OtpVerification";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -28,8 +28,8 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
-  const [showOtp, setShowOtp] = useState(false); // ✅ NEW
-  const [signupEmail, setSignupEmail] = useState(""); // ✅ NEW
+  const [showOtp, setShowOtp] = useState(false);
+  const [signupEmail, setSignupEmail] = useState("");
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -61,23 +61,7 @@ export default function AuthPage() {
         });
 
         login(res.data.token, res.data.user);
-
-        switch (res.data.user.role) {
-          case "Judge":
-            navigate("/judge-dashboard");
-            break;
-          case "Lawyer":
-            navigate("/lawyer-dashboard");
-            break;
-          case "Law Student":
-            navigate("/student-dashboard");
-            break;
-          case "Litigants":
-            navigate("/litigant-dashboard");
-            break;
-          default:
-            setError("Unknown role received from server.");
-        }
+        redirectToDashboard(res.data.user.role);
       } else {
         await axios.post("http://localhost:5000/api/auth/signup-initiate", {
           fullName,
@@ -94,10 +78,8 @@ export default function AuthPage() {
     }
   };
 
-  const handleOtpVerified = (user, token) => {
-    login(token, user);
-
-    switch (user.role) {
+  const redirectToDashboard = (role) => {
+    switch (role) {
       case "Judge":
         navigate("/judge-dashboard");
         break;
@@ -111,8 +93,13 @@ export default function AuthPage() {
         navigate("/litigant-dashboard");
         break;
       default:
-        setError("Unknown role received after verification.");
+        setError("Unknown role received from server.");
     }
+  };
+
+  const handleOtpVerified = (user, token) => {
+    login(token, user);
+    redirectToDashboard(user.role);
   };
 
   return (
@@ -222,6 +209,7 @@ export default function AuthPage() {
                       marginTop: "8px",
                       cursor: "pointer",
                     }}
+                    onClick={() => navigate("/forgot-password")} // ✅ Navigation to route
                   >
                     Forgot Password?
                   </Typography>
@@ -251,7 +239,7 @@ export default function AuthPage() {
             ) : (
               <OtpVerification
                 email={signupEmail}
-                onVerified={(user) => handleOtpVerified(user, localStorage.getItem("token"))}
+                onVerified={handleOtpVerified}
               />
             )}
 
@@ -282,6 +270,7 @@ export default function AuthPage() {
                   onClick={() => {
                     setIsLogin(!isLogin);
                     setError("");
+                    setShowOtp(false);
                   }}
                 >
                   {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}

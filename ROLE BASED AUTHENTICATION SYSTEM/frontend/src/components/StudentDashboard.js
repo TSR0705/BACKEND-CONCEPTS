@@ -110,7 +110,7 @@ export default function StudentDashboard() {
           <Button variant="contained" style={{ backgroundColor: "#007bff", color: "white", marginTop: "1rem" }}>Add Contribution</Button>
         </div>
       </div>
-
+      
       {/* Tools & Resources */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginTop: "2rem" }}>
         {tools.map((tool, index) => (

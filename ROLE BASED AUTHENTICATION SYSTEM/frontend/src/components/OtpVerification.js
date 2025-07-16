@@ -1,26 +1,21 @@
-// components/OtpVerification.js
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { TextField, Button, Typography, Alert } from "@mui/material";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
 
-export default function OtpVerification() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const email = location.state?.email || "";
+export default function OtpVerification({ email, onVerified }) {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleVerify = async () => {
+    setError("");
     if (!otp || !email) {
       setError("Email or OTP missing.");
       return;
     }
 
     try {
+      setLoading(true);
       const res = await axios.post("http://localhost:5000/api/auth/signup-verify", {
         email,
         otp,
@@ -28,27 +23,12 @@ export default function OtpVerification() {
 
       const { token, user } = res.data;
 
-      login(token, user); // Use context to log in
-
-      // Navigate based on role
-      switch (user.role) {
-        case "Judge":
-          navigate("/judge-dashboard");
-          break;
-        case "Lawyer":
-          navigate("/lawyer-dashboard");
-          break;
-        case "Law Student":
-          navigate("/student-dashboard");
-          break;
-        case "Litigants":
-          navigate("/litigant-dashboard");
-          break;
-        default:
-          setError("Unknown user role.");
-      }
+      // Pass user and token to parent for login & redirect
+      onVerified(user, token);
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +38,11 @@ export default function OtpVerification() {
         Verify Your Email
       </Typography>
 
-      {error && <Alert severity="error" style={{ marginBottom: "1rem" }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" style={{ marginBottom: "1rem" }}>
+          {error}
+        </Alert>
+      )}
 
       <TextField
         label="Enter OTP"
@@ -66,6 +50,7 @@ export default function OtpVerification() {
         onChange={(e) => setOtp(e.target.value)}
         fullWidth
         style={{ marginBottom: "1rem" }}
+        InputProps={{ style: { color: "white" } }}
       />
 
       <Button
@@ -73,8 +58,9 @@ export default function OtpVerification() {
         color="primary"
         fullWidth
         onClick={handleVerify}
+        disabled={loading}
       >
-        Verify OTP
+        {loading ? "Verifying..." : "Verify OTP"}
       </Button>
     </div>
   );

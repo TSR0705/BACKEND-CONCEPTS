@@ -49,11 +49,17 @@ This repo includes:
 ![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)
 ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 ![Dotenv](https://img.shields.io/badge/Dotenv-8DD6F9?style=for-the-badge)
-
----
-
----
-
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white)
+![Passport.js](https://img.shields.io/badge/Passport.js-34A853?style=for-the-badge&logo=passport&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Google Cloud Console](https://img.shields.io/badge/Google_Cloud_Console-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)
+![EJS](https://img.shields.io/badge/EJS-8D6748?style=for-the-badge)
+![CORS](https://img.shields.io/badge/CORS-00A8E8?style=for-the-badge)
+![Multer](https://img.shields.io/badge/Multer-8C52FF?style=for-the-badge)
+![Nodemailer](https://img.shields.io/badge/Nodemailer-4B8BBE?style=for-the-badge)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Cookie-Parser](https://img.shields.io/badge/Cookie_Parser-8B5CF6?style=for-the-badge)
+![Bcrypt](https://img.shields.io/badge/Bcrypt-66CC66?style=for-the-badge)
 
 ---
 
@@ -61,16 +67,16 @@ This repo includes:
 
 | Module | Description | Last Updated |
 |--------|-------------|---------------|
+| **MONGODB C‑R‑U‑D 01** | Another hands-on CRUD module, similar to CRUD‑02, with UI support for data entry and updates. | ~3 weeks ago |
 | **MONGODB C‑R‑U‑D 02** | Teaching MongoDB CRUD operations via practical webpage (frontend + backend). Focused on create, read, update, delete with UI integration. | ~1 month ago |
 | **AUTHENTICATION AND AUTHORIZATION 01** | Basic signup/login setup: backend + frontend signup, login routes, JWT auth. | ~1 month ago |
-| **BACKEND‑CLASS‑ROUGH‑WORK** | Preliminary work up to authentication/authorization concepts. | ~1 month ago |
-| **MONGODB C‑R‑U‑D 01** | Another hands-on CRUD module, similar to CRUD‑02, with UI support for data entry and updates. | ~3 weeks ago |
 | **AUTHENTICATION AND AUTHORIZATION 02** | Extended with login UI view, updated CRUD routes, and minor bug fixes. | ~3 weeks ago |
 | **BACKEND‑PRACTICE‑PROJECT‑01** | Combined auth + CRUD in frontend/backend—integrated full-stack user flows. | ~3 weeks ago |
 | **DATA ASSOCIATION 01** | Teaches data associations (e.g., 1‑to‑many, many‑to‑many relationships) implementation patterns. | ~3 weeks ago |
-| **MAJOR PROJECT 01** | Built a full e‑commerce backend: models & routers created for carts, orders, products, users. | ~2 weeks ago |
 | **MINI PROJECT 01** | Blog posting/updating app: covers profile picture uploads, multiple edits, CRUD & auth flows. | ~2 weeks ago |
+| **MAJOR PROJECT 01** | Built a full e‑commerce backend: models & routers created for carts, orders, products, users. | ~2 weeks ago |
 | **ROLE‑BASED AUTHENTICATION SYSTEM** | Advanced auth module: role-based protected routes, OTP-signup & forgot/reset flows. | 2 days ago |
+| **BACKEND‑CLASS‑ROUGH‑WORK** | Preliminary work up to authentication/authorization concepts. | ~1 month ago |
 
 ---
 
@@ -89,23 +95,6 @@ BACKEND-CONCEPTS/
 ├── MONGODB-C-R-U-D-02/                    # CRUD practice project #2
 └── ROLE-BASED-AUTHENTICATION-SYSTEM/      # Advanced auth with roles + OTP flows
 ```
-
-
-# 🛠️ BACKEND-CONCEPTS
-
-A complete backend learning series — from Node.js & MongoDB fundamentals to production-ready authentication and project builds.
-
-This repository is designed to teach **real-world backend development** in a structured, progressive way using practical modules and projects.
-
----
-
-## 🚀 Features
-
-- Modular folders for each concept  
-- Role-based authentication with OTP flows  
-- CRUD, Auth, File Upload, Emailing, Data Relations  
-- Blog & Ecommerce mini projects  
-- Beginner-friendly → Advanced dev-ready  
 
 ## 🌟 Features
 
@@ -180,4 +169,15 @@ npm run dev
 
 > 📢 Have a suggestion or want to contribute to one of these?  
 Open an issue or start a discussion [here](https://github.com/TSR0705/BACKEND-CONCEPTS/issues).
+
+---
+## 👤 About the Creator
+
+<div align="center">
+  <img src="https://avatars.githubusercontent.com/TSR0705" alt="Tanmay Singh" width="100" style="border-radius:50%;" />
+  <h3>Tanmay Singh</h3>
+<p>
+  <em>Rising Full-Stack Innovator Shaping Next-Gen Web Experiences</em><br/>
+  Cloud-First Mindset | UI/UX-Driven | JavaScript at the Core
+</p>
 

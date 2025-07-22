@@ -11,54 +11,68 @@ const transporter = nodemailer.createTransport({
 
 const sendOTPEmail = async (to, otp, username = 'User') => {
   const mailOptions = {
-    from: `"YourApp Support" <${process.env.EMAIL_USER}>`,
+    from: `"Samvidhan Setu Support" <${process.env.EMAIL_USER}>`,
     to,
-    subject: '🔐 Your OTP for Account Verification',
+    subject: '🔐 Verify Your Identity – OTP Enclosed',
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Your OTP Code</title>
+          <title>OTP Verification</title>
         </head>
-        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
-          <table width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px 0;">
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: #e6ecf0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="padding: 30px 0;">
             <tr>
               <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); overflow: hidden;">
                   
                   <!-- Header -->
                   <tr>
-                    <td style="padding: 30px 40px; text-align: center; background-color: #0f62fe;">
-                      <h1 style="color: #ffffff; margin: 0;">YourApp</h1>
-                      <p style="color: #cce0ff; font-size: 14px;">Secure Verification</p>
+                    <td align="center" style="background: linear-gradient(135deg, #0f62fe, #4781ff); padding: 30px 20px;">
+                      <img src="https://yourdomain.com/logo.png" alt="Samvidhan Setu Logo" width="120" style="margin-bottom: 12px;" />
+                      <h1 style="color: #fff; margin: 0; font-size: 24px;">Samvidhan Setu</h1>
+                      <p style="color: #dbe9ff; font-size: 14px; margin-top: 4px;">Secure Identity Verification</p>
                     </td>
                   </tr>
 
-                  <!-- Content -->
+                  <!-- Body -->
                   <tr>
-                    <td style="padding: 30px 40px;">
-                      <p style="font-size: 16px; color: #333;">Hello <strong>${username}</strong>,</p>
-                      <p style="font-size: 16px; color: #333;">
-                        Use the following One-Time Password (OTP) to complete your verification:
+                    <td style="padding: 40px 30px;">
+                      <p style="font-size: 18px; margin-bottom: 10px; color: #333;">Hello <strong>${username}</strong>,</p>
+                      <p style="font-size: 16px; color: #444;">
+                        Please use the following One-Time Password (OTP) to verify your identity. This code is valid for the next <strong>10 minutes</strong> and should not be shared with anyone.
                       </p>
 
-                      <p style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #0f62fe; text-align: center; margin: 30px 0;">
-                        ${otp}
-                      </p>
+                      <!-- OTP Box -->
+                      <div style="margin: 40px auto; text-align: center;">
+                        <span style="
+                          display: inline-block;
+                          background: #0f62fe;
+                          color: #ffffff;
+                          padding: 16px 32px;
+                          font-size: 28px;
+                          font-weight: 600;
+                          border-radius: 10px;
+                          letter-spacing: 6px;
+                          box-shadow: 0 6px 20px rgba(15, 98, 254, 0.4);
+                        ">
+                          ${otp}
+                        </span>
+                      </div>
 
-                      <p style="font-size: 14px; color: #777;">
-                        This code is valid for <strong>10 minutes</strong>. If you did not request this, please ignore this email or contact support.
+                      <p style="font-size: 14px; color: #666;">
+                        If you did not request this, please disregard this email or <a href="mailto:support@samvidhansetu.com" style="color: #0f62fe; text-decoration: none;">contact our support team</a> immediately.
                       </p>
                     </td>
                   </tr>
 
                   <!-- Footer -->
                   <tr>
-                    <td style="padding: 20px 40px; background-color: #f0f0f0; text-align: center; font-size: 12px; color: #888;">
-                      &copy; ${new Date().getFullYear()} YourApp. All rights reserved.<br />
-                      Need help? <a href="mailto:support@yourapp.com" style="color: #0f62fe; text-decoration: none;">Contact Support</a>
+                    <td style="padding: 20px 30px; background-color: #f4f4f4; text-align: center; font-size: 12px; color: #888;">
+                      &copy; ${new Date().getFullYear()} Samvidhan Setu. All rights reserved.<br/>
+                      <a href="mailto:support@samvidhansetu.com" style="color: #0f62fe; text-decoration: underline;">support@samvidhansetu.com</a>
                     </td>
                   </tr>
 
